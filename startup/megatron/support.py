@@ -1,16 +1,12 @@
-from bluesky import RunEngine, Msg
-from ophyd import EpicsMotor, EpicsSignal, EpicsSignalWithRBV, EpicsSignalRO, DeviceStatus
-from bluesky.callbacks.best_effort import BestEffortCallback
-from bluesky.utils import ProgressBarManager
-import bluesky.preprocessors as bp
-
-import bluesky.plan_stubs as bps
-
-import re
 import time
 import numpy as np
 import asyncio
 import uuid
+
+from bluesky import Msg
+from ophyd import DeviceStatus
+import bluesky.plan_stubs as bps
+
 
 class _ConditionStatus(DeviceStatus):
     """
