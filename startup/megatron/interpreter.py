@@ -8,7 +8,7 @@ import shlex
 from bluesky.utils import make_decorator
 import bluesky.plan_stubs as bps
 
-from .support import wait_for_condition, motor_move, motor_stop
+from .support import wait_for_condition, motor_move, motor_stop, motor_home
 
 
 _device_mapping = {
@@ -84,6 +84,9 @@ class Interpreter:
                 elif ss[0] == "st" and len(ss) == 1:
                     print(f"Stop motor")
                     yield from self._galil_stop()
+                elif ss[0] == "hm" and len(ss) == 1:
+                    print(f"Home motor")
+                    yield from self._galil_home()
                 elif ss[0] == "waitai" and len(ss) >= 4 and len(ss) <= 6:
                     print(f"Wait for condition (Analog Input)")
                     yield from self._waitai(ss[1:])
@@ -119,6 +122,9 @@ class Interpreter:
 
     def _galil_stop(self):
         yield from motor_stop(self.devices.galil)
+
+    def _galil_home(self):
+        yield from motor_home(self.devices.galil)
 
     def _waitai(self, params):
         source = params[0]

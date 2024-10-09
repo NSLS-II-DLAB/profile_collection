@@ -1,6 +1,7 @@
 log "Galil VAL"
 log "Galil RBV"
 
+hm
 sp 1500000
 pa 10000000
 bg

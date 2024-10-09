@@ -247,3 +247,8 @@ def motor_move(motor, position, is_rel=False):
     yield from motor_stop(motor)
     _set = bps.rel_set if is_rel else bps.abs_set
     yield from _set(motor, position, wait=False)
+
+
+def motor_home(motor):
+    yield from motor_stop(motor)
+    motor.home(direction="reverse")
