@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from bluesky import RunEngine, Msg
-from ophyd import EpicsMotor, EpicsSignal, EpicsSignalWithRBV, EpicsSignalRO, DeviceStatus
+from ophyd import EpicsMotor, EpicsSignal, EpicsSignalWithRBV, EpicsSignalRO, DeviceStatus, Component as Cpt
 from bluesky.callbacks.best_effort import BestEffortCallback
 from bluesky.utils import ProgressBarManager
 import bluesky.preprocessors as bp
@@ -10,8 +10,11 @@ import bluesky.plan_stubs as bps
 from megatron.support import register_custom_instructions
 from megatron.interpreter import Interpreter, ts_periodic_logging_decorator
 
+class EpicsMotorGalil(EpicsMotor):
+    homing_monitor = Cpt(EpicsSignalRO, ".A_HOMING_MONITOR", kind="omitted", auto_monitor=True)
+    channel_enable = Cpt(EpicsSignal, ".CNEN", kind="omitted", auto_monitor=True)
 
-galil = EpicsMotor('sim:mtr1', name='galil')
+galil = EpicsMotorGalil('sim:mtr1', name='galil')
 galil_val = EpicsSignal('sim:mtr1.VAL', name='galil_val', auto_monitor=True)
 galil_rbv = EpicsSignalRO('sim:mtr1.RBV', name='galil_rbv', auto_monitor=True)
 

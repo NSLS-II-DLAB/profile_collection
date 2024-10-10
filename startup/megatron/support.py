@@ -244,6 +244,7 @@ def motor_stop(motor):
 
 
 def motor_move(motor, position, is_rel=False):
+    yield from motor_channel_enable()
     yield from motor_stop(motor)
     _set = bps.rel_set if is_rel else bps.abs_set
     yield from _set(motor, position, wait=False)
@@ -252,7 +253,12 @@ def motor_move(motor, position, is_rel=False):
 # galil_home = EpicsSignal('sim:mtr1.HOMR', name='galil_home', auto_monitor=True)
 
 def motor_home(motor):
+    yield from motor_channel_enable()
     yield from motor_stop(motor)
     yield from bps.abs_set(motor.home_reverse, 1, wait=True)
     #yield from wait_for_condition(galil_home, 0, "==")
-    yield from wait_for_condition(motor.home_reverse, 0, "==")
+    yield from wait_for_condition(motor.homing_monitor, 0, "==")
+
+
+def motor_channel_enable(motor):
+    yield from bps.abs_set(motor.channel_enable, 1, wait=True)
