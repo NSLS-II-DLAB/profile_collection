@@ -5,6 +5,9 @@ hm
 sp 1500000
 pa 10000000
 bg
+t1
+pa 10000000
+bg
 waitai "Galil RBV", >=, 10000000
 #t2
 sp 200000

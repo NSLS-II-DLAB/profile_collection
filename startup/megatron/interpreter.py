@@ -142,7 +142,6 @@ class Interpreter:
         else:
             raise RuntimeError(f"Unrecognized device name: {source!r}")
 
-        #signal = self.devices.galil_signal
         yield from wait_for_condition(
             signal=signal, target=value/1000000, operator=operator, tolerance=tolerance, timeout=timeout
         )
