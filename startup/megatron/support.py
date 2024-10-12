@@ -1,11 +1,12 @@
-import time
-import numpy as np
 import asyncio
+import time
 import uuid
 
-from bluesky import Msg
-from ophyd import DeviceStatus, EpicsMotor, EpicsSignalRO, EpicsSignal, Component as Cpt
 import bluesky.plan_stubs as bps
+import numpy as np
+from bluesky import Msg
+from ophyd import Component as Cpt
+from ophyd import DeviceStatus, EpicsMotor, EpicsSignal, EpicsSignalRO
 
 
 class EpicsMotorGalil(EpicsMotor):
@@ -63,19 +64,19 @@ class _ConditionStatus(DeviceStatus):
         super().__init__(signal, **kwargs)
 
         def cb(*args, obj=None, sub_type=None, **kwargs):
-            timestamp = kwargs.get("timestamp")
+            # timestamp = kwargs.get("timestamp")
             value = kwargs.get("value")
 
             success = False
             if operator == "<":
-               if value < target:
-                   success = True
+                if value < target:
+                    success = True
             elif operator == "<=":
-               if value <= target:
-                   success = True
+                if value <= target:
+                    success = True
             elif operator == ">":
                 if value > target:
-                     success = True
+                    success = True
             elif operator == ">=":
                 if value >= target:
                     success = True
@@ -101,7 +102,7 @@ class _ConditionStatus(DeviceStatus):
         # Notify watchers (things like progress bars) of new values
         # at the device's natural update rate.
         if not self.done:
-           self.pos.subscribe(self._notify_watchers, event_type=event_type)
+            self.pos.subscribe(self._notify_watchers, event_type=event_type)
 
     def watch(self, func):
         """
@@ -124,6 +125,7 @@ class _ConditionStatus(DeviceStatus):
                 * ``time_elapsed``
                 * ``time_remaining``
         """
+
         def f(*args, unit=None, **kwargs):
             _unit = "unit"
             if isinstance(unit, str):
@@ -204,22 +206,21 @@ class _ConditionStatus(DeviceStatus):
     __repr__ = __str__
 
 
-
 def gen_set_condition(re):
 
     async def _inner(msg):
-        signal = msg.kwargs['signal']
-        target = msg.kwargs['target']
-        operator = msg.kwargs['operator']
-        tolerance = msg.kwargs.get('tolerance', None)
-        group = msg.kwargs['group']
+        signal = msg.kwargs["signal"]
+        target = msg.kwargs["target"]
+        operator = msg.kwargs["operator"]
+        tolerance = msg.kwargs.get("tolerance", None)
+        group = msg.kwargs["group"]
 
         pardon_failures = re._pardon_failures
         p_event = asyncio.Event(**re._loop_for_kwargs)
         ret = _ConditionStatus(signal=signal, target=target, operator=operator, tolerance=tolerance)
 
         def done_callback(status=None):
-            #RE.log.debug("The object %r reports set is done with status %r", obj, ret.success)
+            # RE.log.debug("The object %r reports set is done with status %r", obj, ret.success)
             re._loop.call_soon_threadsafe(re._status_object_completed, ret, p_event, pardon_failures)
 
         try:
@@ -231,7 +232,6 @@ def gen_set_condition(re):
         re._groups[group].add(p_event.wait)
         re._status_objs[group].add(ret)
 
-
         return (ret,)
 
     return _inner
@@ -239,12 +239,12 @@ def gen_set_condition(re):
 
 def register_custom_instructions(re):
     _set_condition = gen_set_condition(re=re)
-    re.register_command('set_condition', _set_condition)
+    re.register_command("set_condition", _set_condition)
 
 
 def wait_for_condition(signal, target, operator, tolerance=0, timeout=None):
     group = str(uuid.uuid4())
-    yield Msg('set_condition', signal=signal, target=target, operator=operator, group=group)
+    yield Msg("set_condition", signal=signal, target=target, operator=operator, group=group)
     yield Msg("wait", None, group=group, timeout=timeout)
 
 
@@ -260,6 +260,7 @@ def motor_move(motor, position, is_rel=False):
     yield from motor_stop(motor)
     _set = bps.rel_set if is_rel else bps.abs_set
     yield from _set(motor, position, wait=False)
+
 
 def motor_home(motor):
     yield from motor_channel_enable(motor)

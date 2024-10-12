@@ -1,22 +1,19 @@
-import re
-from datetime import datetime
-import os
 import asyncio
-from types import SimpleNamespace
+import os
+import re
 import shlex
+from datetime import datetime
+from types import SimpleNamespace
 
-from bluesky.utils import make_decorator
 import bluesky.plan_stubs as bps
+from bluesky.utils import make_decorator
 
-from .support import wait_for_condition, motor_move, motor_stop, motor_home
+from .support import motor_home, motor_move, motor_stop, wait_for_condition
 
-
-_device_mapping = {
-    "Galil RBV": "galil_rbv",
-    "Galil VAL": "galil_val"
-}
+_device_mapping = {"Galil RBV": "galil_rbv", "Galil VAL": "galil_val"}
 
 _required_devices = ("galil", "galil_val", "galil_rbv")
+
 
 class Interpreter:
 
@@ -59,39 +56,39 @@ class Interpreter:
         if ss:
             if scan_for_logs:
                 if ss[0] == "log" and len(ss) == 2:
-                    print(f"Adding variable to the log")
+                    print("Adding variable to the log")
                     yield from self._log(ss[1:])
             else:
                 if re.search(r"^t\d+$", ss[0]) and len(ss) == 1:
                     _ = int(ss[0][1:])
                     print(f"Pause: {_} s")
                     yield from bps.sleep(_)
-                elif ss[0] == "sp" and len(ss) == 2 and re.search(f"^\d+$", ss[1]):
+                elif ss[0] == "sp" and len(ss) == 2 and re.search(r"^\d+$", ss[1]):
                     _ = int(ss[1])
                     print(f"Set speed: {_}")
                     yield from self._galil_set_speed(_)
-                elif ss[0] == "pa" and len(ss) == 2 and re.search(f"^-*\d+$", ss[1]):
+                elif ss[0] == "pa" and len(ss) == 2 and re.search(r"^-*\d+$", ss[1]):
                     _ = int(ss[1])
                     print(f"Set absolute position: {_}")
                     yield from self._galil_set_abs_pos(_)
-                elif ss[0] == "pr" and len(ss) == 2 and re.search(f"^-*\d+$", ss[1]):
+                elif ss[0] == "pr" and len(ss) == 2 and re.search(r"^-*\d+$", ss[1]):
                     _ = int(ss[1])
                     print(f"Set relative position: {_}")
                     yield from self._galil_set_rel_pos(_)
                 elif ss[0] == "bg" and len(ss) == 1:
-                    print(f"Begin")
+                    print("Begin")
                     yield from self._galil_begin()
                 elif ss[0] == "st" and len(ss) == 1:
-                    print(f"Stop motor")
+                    print("Stop motor")
                     yield from self._galil_stop()
                 elif ss[0] == "hm" and len(ss) == 1:
-                    print(f"Home motor")
+                    print("Home motor")
                     yield from self._galil_home()
                 elif ss[0] == "waitai" and len(ss) >= 4 and len(ss) <= 6:
-                    print(f"Wait for condition (Analog Input)")
+                    print("Wait for condition (Analog Input)")
                     yield from self._waitai(ss[1:])
                 elif ss[0] == "waitdi" and len(ss) >= 3 and len(ss) <= 4:
-                    print(f"Wait for condition (Digital Input)")
+                    print("Wait for condition (Digital Input)")
                     yield from self._waitdi(ss[1:])
                 elif ss[0] == "log" and len(ss) == 2:
                     yield from bps.null()
@@ -116,9 +113,9 @@ class Interpreter:
         yield from bps.null()
 
     def _galil_begin(self):
-        yield from bps.mv(self.devices.galil.velocity, self.galil_speed/1000000)
+        yield from bps.mv(self.devices.galil.velocity, self.galil_speed / 1000000)
         yield from bps.checkpoint()
-        yield from motor_move(self.devices.galil, self.galil_pos/1000000, is_rel=self.galil_abs_rel)
+        yield from motor_move(self.devices.galil, self.galil_pos / 1000000, is_rel=self.galil_abs_rel)
 
     def _galil_stop(self):
         yield from motor_stop(self.devices.galil)
@@ -143,7 +140,7 @@ class Interpreter:
             raise RuntimeError(f"Unrecognized device name: {source!r}")
 
         yield from wait_for_condition(
-            signal=signal, target=value/1000000, operator=operator, tolerance=tolerance, timeout=timeout
+            signal=signal, target=value / 1000000, operator=operator, tolerance=tolerance, timeout=timeout
         )
 
     def _waitdi(self, params):
@@ -161,14 +158,13 @@ class Interpreter:
 
         signal = self.devices.galil_signal
         yield from wait_for_condition(
-            signal=signal, target=value/1000000, operator="==", tolerance=0, timeout=timeout
+            signal=signal, target=value / 1000000, operator="==", tolerance=0, timeout=timeout
         )
 
     def _log(self, params):
         source = params[0]
         self.logged_signals[source] = getattr(self.devices, _device_mapping[source])
         yield from bps.null()
-
 
 
 def ts_periodic_logging_wrapper(plan, signals, log_file_path, period=1):
@@ -187,7 +183,7 @@ def ts_periodic_logging_wrapper(plan, signals, log_file_path, period=1):
 
             with open(log_file_path, "at") as f:
                 if is_new_file:
-                    s = ",".join([f"\"{_}\"" for _ in signals.keys()])
+                    s = ",".join([f'"{_}"' for _ in signals.keys()])
                     f.write(f"Timestamp,{s}\n")
                 s = ",".join([f"{_.value}" for _ in signals.values()])
                 f.write(f"{timestamp},{s}\n")
@@ -197,11 +193,11 @@ def ts_periodic_logging_wrapper(plan, signals, log_file_path, period=1):
     class StartStopLogging(object):
 
         def __enter__(self):
-            print(f"Starting periodic logging")
+            print("Starting periodic logging")
             asyncio.ensure_future(logging_coro())
 
         def __exit__(self, *args):
-            print(f"Stopping periodic logging")
+            print("Stopping periodic logging")
             stop.set()
 
     def _inner():

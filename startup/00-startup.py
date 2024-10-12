@@ -1,23 +1,22 @@
 from datetime import datetime
 
-from bluesky import RunEngine, Msg
-from ophyd import EpicsMotor, EpicsSignal, EpicsSignalWithRBV, EpicsSignalRO, DeviceStatus, Component as Cpt
-from bluesky.callbacks.best_effort import BestEffortCallback
-from bluesky.utils import ProgressBarManager
 import bluesky.preprocessors as bp
-import bluesky.plan_stubs as bps
+from bluesky import RunEngine
 
-from megatron.support import register_custom_instructions, EpicsMotorGalil
+# from bluesky.callbacks.best_effort import BestEffortCallback
+from bluesky.utils import ProgressBarManager
 from megatron.interpreter import Interpreter, ts_periodic_logging_decorator
+from megatron.support import EpicsMotorGalil, register_custom_instructions
+from ophyd import EpicsSignal, EpicsSignalRO
 
-galil = EpicsMotorGalil('sim:mtr1', name='galil')
-galil_val = EpicsSignal('sim:mtr1.VAL', name='galil_val', auto_monitor=True)
-galil_rbv = EpicsSignalRO('sim:mtr1.RBV', name='galil_rbv', auto_monitor=True)
+galil = EpicsMotorGalil("sim:mtr1", name="galil")
+galil_val = EpicsSignal("sim:mtr1.VAL", name="galil_val", auto_monitor=True)
+galil_rbv = EpicsSignalRO("sim:mtr1.RBV", name="galil_rbv", auto_monitor=True)
 
 RE = RunEngine({})
 
-#bec = BestEffortCallback()
-#RE.subscribe(bec)
+# bec = BestEffortCallback()
+# RE.subscribe(bec)
 RE.waiting_hook = ProgressBarManager()
 
 register_custom_instructions(re=RE)
@@ -27,6 +26,7 @@ devices = {"galil": galil, "galil_val": galil_val, "galil_rbv": galil_rbv}
 interpreter = Interpreter(devices=devices)
 
 logging_dir = "./logs"
+
 
 @bp.reset_positions_decorator([galil.velocity])
 def execute_script(script_path):
@@ -38,7 +38,7 @@ def execute_script(script_path):
     for s in script:
         yield from interpreter._process_line(s, scan_for_logs=True)
 
-    for k,v in interpreter.logged_signals.items():
+    for k, v in interpreter.logged_signals.items():
         print(f"{k}: {v}")
 
     # Generate log file name based on current date and time
