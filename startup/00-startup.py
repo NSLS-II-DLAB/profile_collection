@@ -7,21 +7,8 @@ from bluesky.utils import ProgressBarManager
 import bluesky.preprocessors as bp
 import bluesky.plan_stubs as bps
 
-from megatron.support import register_custom_instructions
+from megatron.support import register_custom_instructions, EpicsMotorGalil
 from megatron.interpreter import Interpreter, ts_periodic_logging_decorator
-
-
-class EpicsMotorGalil(EpicsMotor):
-    homing_monitor = Cpt(EpicsSignalRO, ".ATHM", kind="omitted", auto_monitor=True)
-    channel_enable = Cpt(EpicsSignal, ".CNEN", kind="omitted", auto_monitor=True)
-
-    def move(self, position, wait=True, **kwargs):
-        st = super().move(position, wait=wait, **kwargs)
-        if not wait:
-            self.clear_sub(st._finished)
-            st.set_finished()
-        return st
-
 
 galil = EpicsMotorGalil('sim:mtr1', name='galil')
 galil_val = EpicsSignal('sim:mtr1.VAL', name='galil_val', auto_monitor=True)

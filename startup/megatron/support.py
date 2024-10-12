@@ -4,8 +4,20 @@ import asyncio
 import uuid
 
 from bluesky import Msg
-from ophyd import DeviceStatus
+from ophyd import DeviceStatus, EpicsMotor, EpicsSignalRO, EpicsSignal, Component as Cpt
 import bluesky.plan_stubs as bps
+
+
+class EpicsMotorGalil(EpicsMotor):
+    homing_monitor = Cpt(EpicsSignalRO, ".ATHM", kind="omitted", auto_monitor=True)
+    channel_enable = Cpt(EpicsSignal, ".CNEN", kind="omitted", auto_monitor=True)
+
+    def move(self, position, wait=True, **kwargs):
+        st = super().move(position, wait=wait, **kwargs)
+        if not wait:
+            self.clear_sub(st._finished)
+            st.set_finished()
+        return st
 
 
 class _ConditionStatus(DeviceStatus):
