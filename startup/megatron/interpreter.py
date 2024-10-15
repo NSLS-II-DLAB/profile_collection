@@ -76,13 +76,13 @@ class Interpreter:
                     print(f"Set relative position: {_}")
                     yield from self._galil_set_rel_pos(_)
                 elif ss[0] == "bg" and len(ss) == 1:
-                    print("Begin")
+                    print("Begin motion")
                     yield from self._galil_begin()
                 elif ss[0] == "st" and len(ss) == 1:
-                    print("Stop motor")
+                    print("Stop the motor")
                     yield from self._galil_stop()
                 elif ss[0] == "hm" and len(ss) == 1:
-                    print("Home motor")
+                    print("Homing the motor")
                     yield from self._galil_home()
                 elif ss[0] == "waitai" and len(ss) >= 4 and len(ss) <= 6:
                     print("Wait for condition (Analog Input)")
@@ -95,7 +95,7 @@ class Interpreter:
                 else:
                     raise RuntimeError(f"Invalid code line: {code_line!r} ({ss})")
         else:
-            print("Skipping the empty line")
+            # print("Skipping the empty line")
             yield from bps.null()
 
     def _galil_set_speed(self, speed):

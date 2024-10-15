@@ -266,6 +266,7 @@ def motor_home(motor):
     yield from motor_channel_enable(motor)
     yield from motor_stop(motor)
     yield from bps.abs_set(motor.home_reverse, 1, wait=True)
+    yield from bps.sleep(1)
     yield from wait_for_condition(motor.homing_monitor, 0, "==")
 
 
