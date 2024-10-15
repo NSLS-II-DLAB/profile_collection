@@ -69,16 +69,16 @@ class _ConditionStatus(DeviceStatus):
 
             success = False
             if operator == "<":
-                if value < target:
+                if value < target + tolerance:
                     success = True
             elif operator == "<=":
-                if value <= target:
+                if value <= target + tolerance:
                     success = True
             elif operator == ">":
-                if value > target:
+                if value > target - tolerance:
                     success = True
             elif operator == ">=":
-                if value >= target:
+                if value >= target - tolerance:
                     success = True
             elif operator in ("=", "=="):
                 if target - tolerance <= value <= target + tolerance:
