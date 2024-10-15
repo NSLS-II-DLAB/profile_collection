@@ -1,0 +1,19 @@
+log "Galil VAL"
+log "Galil RBV"
+
+sp 10000000
+hm
+
+t1
+
+sp 10000000
+pa 50000000
+bg
+
+t1
+
+sp 10000000
+pr -50000000
+bg
+
+

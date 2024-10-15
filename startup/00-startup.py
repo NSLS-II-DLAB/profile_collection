@@ -9,9 +9,12 @@ from megatron.interpreter import Interpreter, ts_periodic_logging_decorator
 from megatron.support import EpicsMotorGalil, register_custom_instructions
 from ophyd import EpicsSignal, EpicsSignalRO
 
-galil = EpicsMotorGalil("sim:mtr1", name="galil")
-galil_val = EpicsSignal("sim:mtr1.VAL", name="galil_val", auto_monitor=True)
-galil_rbv = EpicsSignalRO("sim:mtr1.RBV", name="galil_rbv", auto_monitor=True)
+prefix = "Test{DMC:1}A"
+#prefix = "sim:mtr1"
+
+galil = EpicsMotorGalil(f"{prefix}", name='galil')
+galil_val = EpicsSignal(f'{prefix}.VAL', name='galil_val', auto_monitor=True)
+galil_rbv = EpicsSignalRO(f'{prefix}.RBV', name='galil_rbv', auto_monitor=True)
 
 RE = RunEngine({})
 

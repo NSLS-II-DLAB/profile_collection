@@ -1,0 +1,7 @@
+log "Galil VAL"
+log "Galil RBV"
+
+sp 10000000
+hm
+
+#t60
