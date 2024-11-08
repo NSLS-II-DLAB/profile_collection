@@ -16,8 +16,8 @@
 
 
 import argparse
-import sys
 import os
+import sys
 from datetime import datetime
 
 import bluesky.preprocessors as bp
@@ -29,8 +29,8 @@ from megatron.logger import ts_periodic_logging_decorator
 from megatron.support import EpicsMotorGalil, register_custom_instructions
 from ophyd import EpicsSignal, EpicsSignalRO
 
-if 'get_ipython' in globals():
-    sys.argv = ['00-startup.py', '--script-dir', './scripts', '--logging-dir', './logs']
+if "get_ipython" in globals():
+    sys.argv = ["00-startup.py", "--script-dir", "./scripts", "--logging-dir", "./logs"]
 
 parser = argparse.ArgumentParser(
     description=(
