@@ -16,6 +16,7 @@
 
 
 import argparse
+import sys
 import os
 from datetime import datetime
 
@@ -27,6 +28,9 @@ from megatron.interpreter import MegatronInterpreter
 from megatron.logger import ts_periodic_logging_decorator
 from megatron.support import EpicsMotorGalil, register_custom_instructions
 from ophyd import EpicsSignal, EpicsSignalRO
+
+if 'get_ipython' in globals():
+    sys.argv = ['00-startup.py', '--script-dir', './scripts', '--logging-dir', './logs']
 
 parser = argparse.ArgumentParser(
     description=(
@@ -63,12 +67,16 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-prefix = "sim:mtr1" if args.use_sim_motor else "Test{DMC:1}A"
+prefix = "Test{DMC:1}A" if args.use_sim_motor else "sim:mtr1"
 
 script_dir = args.script_dir
 logging_dir = args.logging_dir
 log_file_name = args.log_file_name or datetime.now().strftime("%Y%m%d_%H%M%S") + ".csv"
 
+script_dir = os.path.expanduser(script_dir)
+script_dir = os.path.abspath(script_dir)
+logging_dir = os.path.expanduser(logging_dir)
+logging_dir = os.path.abspath(logging_dir)
 os.makedirs(logging_dir, exist_ok=True)
 log_file_path = os.path.join(logging_dir, log_file_name)
 
@@ -88,10 +96,13 @@ RE.waiting_hook = ProgressBarManager()
 register_custom_instructions(re=RE)
 
 context = create_shared_context(devices)
+context.script_dir = script_dir
 interpreter = MegatronInterpreter(shared_context=context)
 
 
 @bp.reset_positions_decorator([galil.velocity])
 @ts_periodic_logging_decorator(signals=context.logged_signals, log_file_path=log_file_path, period=1)
-def run_with_logging(script_path):
+def run_with_logging(script_name):
+    script_name = os.path.relpath(script_name, start=".")
+    script_path = os.path.join(context.script_dir, script_name)
     yield from interpreter.execute_script(script_path)
