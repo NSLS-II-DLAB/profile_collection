@@ -10,10 +10,21 @@ from bluesky.utils import make_decorator
 
 from .support import motor_home, motor_move, motor_stop, wait_for_condition
 
-_device_mapping = {"Galil RBV": "galil_rbv", "Galil VAL": "galil_val"}
+_device_mapping = {
+    "Galil RBV": "galil_rbv",
+    "Galil VAL": "galil_val",
+    "ION Power": "ION_Pump_PS.Pwr_I",
+    "ION Current": "ION_Pump_PS.I_I",
+    "ION Voltage": "ION_Pump_PS.E_I",
+    "ION Arc Rate": "ION_Pump_PS.Rate_Arc_I",
+    "ION KWH Count": "ION_Pump_PS.Cnt_Target_KwHr_RB",
+    "ION Output Enable": "ION_Pump_PS.Enbl_Out_Cmd",
+}
 
-_required_devices = ("galil", "galil_val", "galil_rbv")
+_required_devices = ("galil", "galil_val", "galil_rbv", "ION_Pump_PS")
 
+
+_name_to_device = {}
 
 class Interpreter:
 
@@ -34,11 +45,25 @@ class Interpreter:
                 raise RuntimeError(f"Device {device} is missing in the devices list")
 
         self.devices = SimpleNamespace(**devices)
+        self._name_to_device = {}
+        self._process_supported_devices()
+
         self.galil_abs_rel = 0  # 0 - absolute, 1 - relative
         self.galil_pos = 0
         self.galil_speed = 1000000
 
         self.logged_signals = {}
+
+    def _process_supported_devices(self):
+        """
+        Create a mapping that associates device description (as used in scripts) to
+        the respective device object or component.
+        """
+        for desc, nm  in _device_mapping.items():
+            dev_name_full = nm
+            dev_name = dev_name_full.split(".", 1)[0]
+            dev = eval(dev_name_full, {dev_name: getattr(self.devices, dev_name)})
+            self._name_to_device[desc] = dev
 
     def _process_line(self, code_line, *, scan_for_logs=False):
         # TODO: Modify the parsing algorithm to properly handle quoted strings with spaces
@@ -84,6 +109,9 @@ class Interpreter:
                 elif ss[0] == "hm" and len(ss) == 1:
                     print("Homing the motor")
                     yield from self._galil_home()
+                elif ss[0] == "set" and len(ss) == 3:
+                    print("Setting digital output")
+                    yield from self._set(ss[1:])
                 elif ss[0] == "waitai" and len(ss) >= 4 and len(ss) <= 6:
                     print("Wait for condition (Analog Input)")
                     yield from self._waitai(ss[1:])
@@ -122,6 +150,14 @@ class Interpreter:
 
     def _galil_home(self):
         yield from motor_home(self.devices.galil)
+
+    def _set(self, params):
+        # Set digital output
+        dev_name = params[0]
+        v = params[1]
+        value = v if isinstance(v, str) else int(v)
+        device = self._name_to_device[dev_name]
+        yield from bps.abs_set(device, value)
 
     def _waitai(self, params):
         source = params[0]
@@ -163,7 +199,7 @@ class Interpreter:
 
     def _log(self, params):
         source = params[0]
-        self.logged_signals[source] = getattr(self.devices, _device_mapping[source])
+        self.logged_signals[source] = self._name_to_device[source]
         yield from bps.null()
 
 
@@ -185,7 +221,10 @@ def ts_periodic_logging_wrapper(plan, signals, log_file_path, period=1):
                 if is_new_file:
                     s = ",".join([f'"{_}"' for _ in signals.keys()])
                     f.write(f"Timestamp,{s}\n")
-                s = ",".join([f"{_.value}" for _ in signals.values()])
+
+                values =  [_.value for _ in signals.values()]
+                s = ",".join([f"{_:.6f}" if isinstance(_, float) else f"{_}" for _ in values])
+                #s = ",".join([f"{_.value:.6f}" for _ in signals.values()])
                 f.write(f"{timestamp},{s}\n")
 
             await asyncio.sleep(period)

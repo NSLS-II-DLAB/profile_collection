@@ -6,7 +6,7 @@ import bluesky.plan_stubs as bps
 import numpy as np
 from bluesky import Msg
 from ophyd import Component as Cpt
-from ophyd import DeviceStatus, EpicsMotor, EpicsSignal, EpicsSignalRO
+from ophyd import DeviceStatus, EpicsMotor, EpicsSignal, EpicsSignalRO, Device
 
 
 class EpicsMotorGalil(EpicsMotor):
@@ -19,6 +19,15 @@ class EpicsMotorGalil(EpicsMotor):
             self.clear_sub(st._finished)
             st.set_finished()
         return st
+
+
+class ION_Pump_PS(Device):
+    Pwr_I = Cpt(EpicsSignalRO, "Pwr-I", kind="omitted", auto_monitor=True)
+    I_I = Cpt(EpicsSignalRO, "I-I", kind="omitted", auto_monitor=True)
+    E_I = Cpt(EpicsSignalRO, "E-I", kind="omitted", auto_monitor=True)
+    Rate_Arc_I = Cpt(EpicsSignalRO, "Rate:Arc-I", kind="omitted", auto_monitor=True)
+    Cnt_Target_KwHr_RB = Cpt(EpicsSignalRO, "Cnt:TargetKwHr-RB", kind="omitted", auto_monitor=True)
+    Enbl_Out_Cmd = Cpt(EpicsSignal, "Enbl:Out-Cmd", string=True, kind="omitted", auto_monitor=True)
 
 
 class _ConditionStatus(DeviceStatus):
