@@ -24,7 +24,7 @@ from bluesky.utils import ProgressBarManager
 from megatron_controls.context import create_shared_context
 from megatron_controls.interpreter import MegatronInterpreter
 from megatron_controls.logger import ts_periodic_logging_decorator
-from megatron_controls.support import EpicsMotorGalil, register_custom_instructions
+from megatron_controls.support import EpicsMotorGalil, ION_Pump_PS, register_custom_instructions
 from ophyd import EpicsSignal, EpicsSignalRO
 
 
@@ -103,7 +103,7 @@ galil.wait_for_connection()
 galil_val.wait_for_connection()
 galil_rbv.wait_for_connection()
 
-devices = {"galil": galil, "galil_val": galil_val, "galil_rbv": galil_rbv}
+devices = {"galil": galil, "galil_val": galil_val, "galil_rbv": galil_rbv, "ION_Pump_PS": ION_Pump_PS}
 
 RE = RunEngine({})
 RE.waiting_hook = ProgressBarManager()
