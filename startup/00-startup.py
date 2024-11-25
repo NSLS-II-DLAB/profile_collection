@@ -29,10 +29,9 @@ from ophyd import EpicsSignal, EpicsSignalRO
 
 
 def is_running_under_ipython():
-    try:
-        __IPYTHON__
+    if hasattr(__builtins__, '__IPYTHON__'):
         return True
-    except NameError:
+    else:
         return False
 
 
@@ -93,7 +92,6 @@ os.makedirs(logging_dir, exist_ok=True)
 log_file_path = os.path.join(logging_dir, log_file_name)
 
 prefix = "sim:mtr1" if use_sim_motor else "Test{DMC:1}A"
-print(f"Using motor prefix: {prefix}")
 
 galil = EpicsMotorGalil(f"{prefix}", name="galil")
 galil_val = EpicsSignal(f"{prefix}.VAL", name="galil_val", auto_monitor=True)
@@ -102,6 +100,9 @@ galil_rbv = EpicsSignalRO(f"{prefix}.RBV", name="galil_rbv", auto_monitor=True)
 galil.wait_for_connection()
 galil_val.wait_for_connection()
 galil_rbv.wait_for_connection()
+
+prefix = "TEST{ION:PS}"
+ION_Pump_PS = ION_Pump_PS(prefix, name="ION_Pump_PS")
 
 devices = {"galil": galil, "galil_val": galil_val, "galil_rbv": galil_rbv, "ION_Pump_PS": ION_Pump_PS}
 
@@ -112,6 +113,8 @@ register_custom_instructions(re=RE)
 
 context = create_shared_context(devices)
 context.script_dir = script_dir
+context.logging_dir = logging_dir
+context.log_file_path = log_file_path
 interpreter = MegatronInterpreter(shared_context=context)
 
 
