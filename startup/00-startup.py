@@ -29,7 +29,7 @@ from ophyd import EpicsSignal, EpicsSignalRO
 
 
 def is_running_under_ipython():
-    if hasattr(__builtins__, '__IPYTHON__'):
+    if hasattr(__builtins__, "__IPYTHON__"):
         return True
     else:
         return False
