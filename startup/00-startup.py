@@ -122,6 +122,15 @@ interpreter = MegatronInterpreter(shared_context=context)
 @ts_periodic_logging_decorator(signals=context.logged_signals, log_file_path=log_file_path, period=1)
 def run_with_logging(script_name):
     script_path = os.path.join(context.script_dir, script_name)
+    logged_pvs = interpreter.scan_script_for_logs(script_path)
+    for pv_name in logged_pvs:
+        device_attr = context.device_mapping.get(pv_name)
+        if not device_attr:
+            raise ValueError(f"Unknown PV name {pv_name}")
+        device = context.devices
+        for attr in device_attr.split("."):
+            device = getattr(device, attr)
+        context.logged_signals[pv_name] = device
     yield from interpreter.execute_script(script_path)
 
 
