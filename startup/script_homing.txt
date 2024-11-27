@@ -1,4 +1,0 @@
-log "Galil VAL"
-log "Galil RBV"
-
-hm
