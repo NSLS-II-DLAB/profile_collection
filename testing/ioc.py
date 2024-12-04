@@ -1,24 +1,52 @@
-import random
-import textwrap
-import time
-
 import numpy as np
+import time
+import textwrap
+import random
+
 from caproto import ChannelType
 from caproto.server import PVGroup, SubGroup, ioc_arg_parser, pvproperty, run
 
 
 class IonPumpPS(PVGroup):
 
-    Pwr_I = pvproperty(value=0, name="Pwr-I", dtype=float, read_only=True, doc="ION Power")
+    Pwr_I = pvproperty(
+        value=0,
+        name="Pwr-I",
+        dtype=float,
+        read_only=True,
+        doc="ION Power"
+    )
 
-    I_I = pvproperty(value=0, name="I-I", dtype=float, read_only=True, doc="ION Current")
+    I_I = pvproperty(
+        value=0,
+        name="I-I",
+        dtype=float,
+        read_only=True,
+        doc="ION Current"
+    )
 
-    E_I = pvproperty(value=0, name="E-I", dtype=float, read_only=True, doc="ION Voltage")
+    E_I = pvproperty(
+        value=0,
+        name="E-I",
+        dtype=float,
+        read_only=True,
+        doc="ION Voltage"
+    )
 
-    Rate_Arc_I = pvproperty(value=0, name="Rate:Arc-I", dtype=float, read_only=True, doc="ION Arc Rate")
+    Rate_Arc_I = pvproperty(
+        value=0,
+        name="Rate:Arc-I",
+        dtype=float,
+        read_only=True,
+        doc="ION Arc Rate"
+    )
 
     Cnt_Target_KwHr_RB = pvproperty(
-        value=0, name="Cnt:TargetKwHr-RB", dtype=float, read_only=True, doc="ION KWH Count"
+        value=0,
+        name="Cnt:TargetKwHr-RB",
+        dtype=float,
+        read_only=True,
+        doc="ION KWH Count"
     )
 
     Enbl_Out_Cmd = pvproperty(
@@ -28,7 +56,7 @@ class IonPumpPS(PVGroup):
         enum_strings=["Enable", "Disable"],
         dtype=ChannelType.ENUM,
         read_only=False,
-        doc="ION Output Enable",
+        doc="ION Output Enable"
     )
 
     @Enbl_Out_Cmd.putter
@@ -66,7 +94,6 @@ class MegatronSim(PVGroup):
     """
 
     ion_pump_power = SubGroup(IonPumpPS, prefix="{{ION:PS}}", doc="Ion pump power supply")
-
 
 if __name__ == "__main__":
     ioc_options, run_options = ioc_arg_parser(
