@@ -81,7 +81,7 @@ else:
     script_dir = os.environ.get("SCRIPT_DIRECTORY_PATH", "./scripts")
     logging_dir = "./logs"
     log_file_name = None
-    use_sim_motor = True
+    use_sim_motor = False
 
 script_dir = os.path.abspath(os.path.expanduser(script_dir))
 logging_dir = os.path.abspath(os.path.expanduser(logging_dir))
@@ -101,7 +101,8 @@ galil.wait_for_connection()
 galil_val.wait_for_connection()
 galil_rbv.wait_for_connection()
 
-prefix = "TEST{ION:PS}"
+#prefix = "TEST{ION:PS}"
+prefix = "Depo{PS:1}"
 ION_Pump_PS = ION_Pump_PS(prefix, name="ION_Pump_PS")
 
 devices = {"galil": galil, "galil_val": galil_val, "galil_rbv": galil_rbv, "ION_Pump_PS": ION_Pump_PS}

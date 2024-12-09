@@ -7,22 +7,24 @@ log "ION Arc Rate"
 log "ION KWH Count"
 log "ION Output Enable"
 
-#hm
-sp 1500000
-pa 10000000
+hm
+sp 15000000
+pa 100000000
 bg
-waitai "Galil RBV", >=, 10000000
+waitai "Galil RBV", >=, 100000000
 
-set "ION Output Enable", "Disable"
+set "ION Output Enable", 1
+set "ION Output Enable", 0
 t3
-set "ION Output Enable", "Enable"
+set "ION Output Enable", 1
+set "ION Output Enable", 0
 
-sp 200000
-pr -1000000
+sp 2000000
+pr -10000000
 bg
-waitai "Galil RBV",<=,9000000,0,12
+waitai "Galil RBV",<=,90000000,0,12
 #t2
-sp 1000000
+sp 10000000
 pa 0
 bg
 waitai "Galil RBV" = 0
