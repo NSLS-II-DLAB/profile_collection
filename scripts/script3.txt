@@ -1,0 +1,13 @@
+log "Galil VAL"
+log "Galil RBV"
+log "ION Power"
+log "ION Current"
+log "ION Voltage"
+log "ION Arc Rate"
+log "ION KWH Count"
+log "ION Output Enable"
+
+set "ION Output Enable", 1
+t5
+set "ION Output Enable", 0
+t5
