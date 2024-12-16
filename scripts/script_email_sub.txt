@@ -1,0 +1,6 @@
+set "ION Output Enable", 1
+set "ION Output Enable", 0
+email "test email", "This is a test email", "gavrilov.dvs@gmail.com"
+t3
+set "ION Output Enable", 1
+set "ION Output Enable", 0

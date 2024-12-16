@@ -1,0 +1,38 @@
+log "Galil VAL"
+log "Galil RBV"
+log "ION Power"
+log "ION Current"
+log "ION Voltage"
+log "ION Arc Rate"
+log "ION KWH Count"
+log "ION Output Enable"
+
+hm
+sp 15000000
+pa 100000000
+bg
+waitai "Galil RBV", >=, 100000000
+
+# run "script_email_sub.txt"
+run "/home/dgavrilov/.ipython/profile_collection/scripts/script_email_sub.txt"
+
+plot "Galil RBV"
+
+
+sp 2000000
+pr -10000000
+bg
+waitai "Galil RBV",<=,90000000,0,12
+#t2
+sp 10000000
+pa 0
+bg
+waitai "Galil RBV" = 0
+
+plot "Galil RBV"
+
+#failif "Galil RBV", 10, "/home/dgavrilov/.ipython/profile_collection/scripts/script_email_fail.txt"
+#t1
+#pa 100000000
+#bg
+#waitai "Galil RBV", >=, 100000000
